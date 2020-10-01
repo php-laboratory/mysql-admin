@@ -1,0 +1,60 @@
+version: "3.5"
+
+services:
+  mysql01:
+    image: mysql:8.0
+    container_name: mysql01
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: "password1"
+      MYSQL_USER: "user1"
+      MYSQL_PASSWORD: "password1"
+      MYSQL_DATABASE: "db1"
+    ports:
+      - 3306:3306
+    volumes:
+      - mysql-volume1:/var/lib/mysql
+    networks:
+      - apache-mysql-php
+
+  mysql02:
+    image: mysql:8.0
+    container_name: mysql02
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: "password2"
+      MYSQL_USER: "user2"
+      MYSQL_PASSWORD: "password2"
+      MYSQL_DATABASE: "db2"
+    ports:
+      - 3307:3306
+    volumes:
+      - mysql-volume2:/var/lib/mysql
+    networks:
+      - apache-mysql-php
+
+  web-server:
+    build: ./
+    image: apache-php
+    container_name: web-server
+    restart: always
+    depends_on:
+      - mysql01
+      - mysql02
+    volumes:
+      - ../src/:/var/www/html/
+    ports:
+      - 80:80
+    networks:
+      - apache-mysql-php
+
+volumes:
+  mysql-volume1:
+    name: mysql-volume1
+  mysql-volume2:
+    name: mysql-volume2
+
+networks:
+  apache-mysql-php:
+    name: apache-mysql-php
+    driver: bridge
